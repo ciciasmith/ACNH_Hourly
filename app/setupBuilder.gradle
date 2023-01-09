@@ -1,0 +1,143 @@
+buildscript {
+    repositories {
+        maven {
+            url uri('../../repo')
+        }
+    }
+    dependencies {
+        apply from: "${buildscript.sourceFile.parentFile.parentFile}/scripts/SetupBuilderVersion.gradle"
+        classpath 'de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
+    }
+}
+
+repositories {
+    maven {
+        url uri('../../repo')
+    }
+}
+
+apply plugin: 'de.inetsoftware.setupbuilder'
+
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src'
+        }
+    }
+}
+
+setupBuilder {
+
+    application = "ACNH Hourly"
+    description = 'plays hourly acnh music'
+    icons = "src/main/resources/icon.icns"
+    vendor = 'cici'
+
+    /*
+    licenseFile "license_en.txt"
+    licenseFile {
+       locale = "de"
+       resource = "license_de.txt"
+    }
+    */
+
+    from jar.outputs
+
+    bundleJre = 1.8
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    mainClass = 'com.inet.testapplication.TestLauncher'
+    mainJar = 'testBuilds.jar'
+
+    runBeforeUninstall {
+        mainClass = 'com.inet.testapplication.TestLauncher'
+    }
+    runAfter {
+        mainClass = 'com.inet.testapplication.TestLauncher'
+        mainJar = 'testBuilds.jar'
+    }
+    service {
+        displayName = "i-net TestLaunch Server"
+        id = "testservice"
+    }
+    version = "3.0"
+    minimumUpdateVersion "2.5"
+}
+
+configure( [ deb, rpm ] ) {
+    doFirst {
+        setupBuilder {
+            defaultResourceLanguage "en"
+            longDescription "longDesc_en.txt"
+        }
+    }
+}
+
+deb {
+    checkPackage = false
+}
+
+dmg {
+    preferencesLink {
+        title = "Testing Link"
+        action = "echo Hello World"
+    }
+    preferencesLink {
+        title = "Second Testing Link"
+        action = "echo Another World, hello"
+    }
+
+    daemonUser = "testingUser"
+}
+
+msi{
+    languages = ["en-us"]
+    //external file("fragmentDlg.wxs")
+    //wxsTemplate = "template.wxs"
+    multiInstanceCount = 10
+}
+
+dmg.dependsOn jar
+msi.dependsOn jar
+
+// If the 'dmg' task is to be build, make sure that the pref pane exists as well
+import org.apache.tools.ant.taskdefs.condition.Os
+task preparePrefPane(type: GradleBuild) {
+
+    buildFile '../../SetupBuilderOSXPrefPane/build.gradle'
+    tasks = ['clean', 'uploadArchives']
+
+    processResources.dependsOn 'preparePrefPane'
+
+    onlyIf {
+        file(buildFile).exists() && Os.isFamily(Os.FAMILY_MAC)
+    }
+}
+
+// run the following task as a dependency to the "check"-task.
+task runAppBundlerTest(type: GradleBuild) {
+
+    buildFile = './appBundler.gradle'
+    tasks = ['clean', 'bundleApp']
+
+    processResources.dependsOn 'runAppBundlerTest'
+
+    onlyIf {
+        file(buildFile).exists() && Os.isFamily(Os.FAMILY_MAC)
+    }
+}
+
+// run the following task as a dependency to the "check"-task.
+task runJNLPBundlerTest(type: GradleBuild) {
+
+    buildFile = './jnlpBundler.gradle'
+    tasks = ['clean', 'bundleApp']
+
+    processResources.dependsOn 'runJNLPBundlerTest'
+
+    onlyIf {
+        file(buildFile).exists() && Os.isFamily(Os.FAMILY_MAC)
+    }
+}
