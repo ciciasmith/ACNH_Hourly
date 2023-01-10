@@ -1,24 +1,7 @@
-buildscript {
-    repositories {
-        maven {
-            url uri('../../repo')
-        }
-    }
-    dependencies {
-        apply from: "${buildscript.sourceFile.parentFile.parentFile}/scripts/SetupBuilderVersion.gradle"
-        classpath 'de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
-    }
+plugins {
+    java
+    id "de.inetsoftware.appbundler" version "7.2.16"
 }
-
-repositories {
-    maven {
-        url uri('../../repo')
-    }
-}
-
-apply plugin: 'de.inetsoftware.setupbuilder'
-
-apply plugin: 'java'
 
 sourceSets {
     main {
@@ -32,7 +15,7 @@ setupBuilder {
 
     application = "ACNH Hourly"
     description = 'plays hourly acnh music'
-    icons = "src/main/resources/icon.icns"
+    icons = "resources/icon.icns"
     vendor = 'cici'
 
     /*

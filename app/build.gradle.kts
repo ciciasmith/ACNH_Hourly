@@ -9,7 +9,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
-    //distribution
+    distribution
     id("de.inetsoftware.setupbuilder") version "7.2.16"
     id("org.openjfx.javafxplugin") version "0.0.13"
 }
@@ -17,6 +17,7 @@ plugins {
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
@@ -27,6 +28,7 @@ dependencies {
     implementation("com.google.guava:guava:30.1.1-jre")
 
     implementation("org.openjfx:javafx:20-ea+11")
+
 }
 
 application {
@@ -47,13 +49,16 @@ dependencies {
 
 /*
 distributions {
+    main {
     distributionBaseName.set("ACNH Hourly")
-        distributionClassifier.set("acnhh")
+        //distributionClassifier.set("acnhh")
         contents {
-            //from("src/readme")
+            into ("resources") {from("resources")}
         }
+    }
 }
 */
+
 
 
 /*
@@ -68,6 +73,27 @@ tasks.jar {
 } 
 */
 
+
+/*
+tasks {
+    val fatJar = register<Jar>("fatJar") {
+        dependsOn.addAll(listOf("compileJava", "compileKotlin", "processResources")) // We need this for Gradle optimization to work
+        archiveClassifier.set("acnh_hourly") // Naming the jar
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        manifest { attributes(mapOf("Main-Class" to application.mainClass)) } // Provided we set it up in the application plugin configuration
+        val sourcesMain = sourceSets.main.get()
+        val contents = configurations.runtimeClasspath.get()
+            .map { if (it.isDirectory) it else zipTree(it) } +
+                sourcesMain.output
+        from(contents)
+    }
+    
+    build {
+        dependsOn(fatJar) // Trigger fat jar creation during build
+    }
+    
+}
+*/
 /*
 setupBuilder {
     vendor          = "Cici"
@@ -76,7 +102,7 @@ setupBuilder {
 
     icons = "src/main/resources/icon.icns"
 
-    from jar.outputs
+    from ("fatJar")
 
     mainClass = "acnh_hourly.App"
     mainJar = "acnh_hourly.jar"
@@ -91,11 +117,23 @@ setupBuilder {
         workDir        = "."
     }
 }
+*/
 
-setupBuilder.dmg {
-    setupIcon = "src/main/resources/icon.icns"
+/* 
+tasks {
+    "dmg" (Task::class) {
+        //setupIcon = "src/main/resources/icon.icns"
+    }
+
+    "msi" (Task::class) {
+        setupBuilder.desktopStarter {
+            displayName = "ACNH Hourly"
+            executable = "acnh_hourly.jar"
+        }
+    }
 }
 */
+
 
 tasks.processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -105,7 +143,6 @@ sourceSets {
     main {
         resources {
             srcDirs("src/main/resources")
-            
         }
     }
 }

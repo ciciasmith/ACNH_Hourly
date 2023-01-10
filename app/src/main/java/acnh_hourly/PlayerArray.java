@@ -31,7 +31,7 @@ public class PlayerArray {
         //populates the array with MediaPlayers containing the appropriate Media for each track 
         
         for (int i = 0; i < HOURS ; i++) {
-            String filename = "src/main/resources/" + version + (i < 10 ? "0" : "") + i + ".mp3";
+            String filename = "resources/" + version + (i < 10 ? "0" : "") + i + ".mp3";
             playerArray[i] = new MediaPlayer(new Media(new File(filename).toURI().toString()));
             playerArray[i].setCycleCount(MediaPlayer.INDEFINITE);
         }

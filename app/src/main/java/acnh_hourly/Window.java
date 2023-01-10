@@ -78,7 +78,7 @@ public class Window {
 
         frame.setSize(400, 200);
 
-        Image image = (new ImageIcon("src/main/resources/icon.png")).getImage();
+        Image image = (new ImageIcon("resources/icon.png")).getImage();
         frame.setIconImage(image);
 
         if (Taskbar.isTaskbarSupported()) {
